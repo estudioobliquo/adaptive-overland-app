@@ -17,6 +17,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   const returnTo = searchParams.get('returnTo') ?? '/';
+  const passwordReset = searchParams.get('reset') === '1';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +25,7 @@ function LoginForm() {
     setLoading(true);
     try {
       const { accessToken } = await login(form.email, form.password);
-      localStorage.setItem('ao_token', accessToken);
-      const user = await getMe();
+      const user = await getMe(accessToken);
       setAuth(user, accessToken);
       router.push(returnTo);
     } catch {
@@ -60,6 +60,7 @@ function LoginForm() {
           onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
         />
 
+        {passwordReset && <p className="text-green-400 text-sm">Contraseña actualizada. Podés iniciar sesión.</p>}
         {error && <p className="text-red-400 text-sm">{error}</p>}
 
         <button
@@ -71,7 +72,12 @@ function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted">
+      <p className="mt-4 text-center text-sm text-muted">
+        <Link href="/olvide-mi-contrasena" className="hover:text-accent transition-colors">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
+      <p className="mt-2 text-center text-sm text-muted">
         ¿No tenés cuenta?{' '}
         <Link href={`/register?returnTo=${returnTo}`} className="text-text hover:text-accent transition-colors">
           Registrate

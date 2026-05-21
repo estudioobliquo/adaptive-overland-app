@@ -1,11 +1,48 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { Trash2, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronRight, AlertTriangle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/store/cart';
+import { getProducts, getSettings } from '@/lib/api';
 
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, total } = useCartStore();
+
+  const { data: freshProducts } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => getProducts(),
+    enabled: items.length > 0,
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: getSettings,
+  });
+
+  const shippingCost = settings?.shipping_cost ? Number(settings.shipping_cost) : 0;
+
+  // Adjust cart quantities based on fresh stock data
+  useEffect(() => {
+    if (!freshProducts) return;
+    items.forEach(({ product, quantity }) => {
+      const fresh = freshProducts.find((p) => p.id === product.id);
+      if (!fresh || !fresh.isActive) {
+        removeItem(product.id);
+      } else if (quantity > fresh.stock) {
+        if (fresh.stock === 0) removeItem(product.id);
+        else updateQuantity(product.id, fresh.stock);
+      }
+    });
+  }, [freshProducts]);
+
+  const stockWarnings = freshProducts
+    ? items.filter(({ product, quantity }) => {
+        const fresh = freshProducts.find((p) => p.id === product.id);
+        return fresh && quantity > fresh.stock && fresh.stock > 0;
+      })
+    : [];
 
   if (items.length === 0) {
     return (
@@ -27,11 +64,20 @@ export default function CarritoPage() {
       <div className="max-w-5xl mx-auto">
         <h1 className="font-heading text-6xl mb-12">CARRITO</h1>
 
+        {stockWarnings.length > 0 && (
+          <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/30 px-4 py-3 mb-6 text-sm text-yellow-400">
+            <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+            <span>Algunos productos tuvieron cambios de stock. Las cantidades fueron ajustadas.</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Items */}
           <div className="lg:col-span-2 space-y-px">
             {items.map(({ product, quantity }) => {
               const mainImage = product.images?.find((i) => i.isMain) ?? product.images?.[0];
+              const fresh = freshProducts?.find((p) => p.id === product.id);
+              const maxStock = fresh?.stock ?? product.stock;
               return (
                 <div key={product.id} className="flex gap-4 bg-surface p-4">
                   <div className="w-20 h-20 flex-shrink-0 bg-bg overflow-hidden">
@@ -45,11 +91,7 @@ export default function CarritoPage() {
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="flex justify-between items-start">
                       <p className="font-heading text-lg leading-tight">{product.name.toUpperCase()}</p>
-                      <button
-                        onClick={() => removeItem(product.id)}
-                        className="text-muted hover:text-text transition-colors p-1"
-                        aria-label="Eliminar"
-                      >
+                      <button onClick={() => removeItem(product.id)} className="text-muted hover:text-text transition-colors p-1">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -64,8 +106,9 @@ export default function CarritoPage() {
                         </button>
                         <span className="px-3 py-1 text-sm">{quantity}</span>
                         <button
-                          onClick={() => updateQuantity(product.id, quantity + 1)}
-                          className="px-2 py-1 text-muted hover:text-text transition-colors text-sm"
+                          onClick={() => updateQuantity(product.id, Math.min(maxStock, quantity + 1))}
+                          disabled={quantity >= maxStock}
+                          className="px-2 py-1 text-muted hover:text-text disabled:opacity-30 transition-colors text-sm"
                         >
                           +
                         </button>
@@ -74,6 +117,9 @@ export default function CarritoPage() {
                         {(Number(product.price) * quantity).toLocaleString('es-PY')} PYG
                       </span>
                     </div>
+                    {fresh && fresh.stock <= 3 && fresh.stock > 0 && (
+                      <p className="text-xs text-yellow-400">Solo {fresh.stock} en stock</p>
+                    )}
                   </div>
                 </div>
               );
@@ -91,11 +137,11 @@ export default function CarritoPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted">Envío</span>
-                <span className="text-muted">A calcular</span>
+                <span>{shippingCost === 0 ? 'Gratis' : `${shippingCost.toLocaleString('es-PY')} PYG`}</span>
               </div>
               <div className="border-t border-border pt-3 flex justify-between font-semibold">
                 <span>Total</span>
-                <span className="text-accent">{total().toLocaleString('es-PY')} PYG</span>
+                <span className="text-accent">{(total() + shippingCost).toLocaleString('es-PY')} PYG</span>
               </div>
             </div>
 

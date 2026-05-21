@@ -6,8 +6,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('ao_token');
+  if (typeof window !== 'undefined' && !config.headers.Authorization) {
+    const { useAuthStore } = require('@/store/auth');
+    const token = useAuthStore.getState().token;
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -38,8 +39,8 @@ export const login = (email: string, password: string) =>
 export const register = (data: { email: string; password: string; firstName: string; lastName: string }) =>
   api.post<AuthResponse>('/auth/register', data).then((r) => r.data);
 
-export const getMe = () =>
-  api.get<User>('/users/me').then((r) => r.data);
+export const getMe = (token?: string) =>
+  api.get<User>('/users/me', token ? { headers: { Authorization: `Bearer ${token}` } } : undefined).then((r) => r.data);
 
 // Orders
 export const createOrder = (data: {
@@ -57,5 +58,53 @@ export const getOrder = (id: string) =>
 // Payments
 export const initPayment = (orderId: string) =>
   api.post<{ url: string; processId: string }>(`/payments/bancard/init/${orderId}`).then((r) => r.data);
+
+// Admin — Orders
+export const getAdminOrders = () =>
+  api.get<Order[]>('/orders').then((r) => r.data);
+
+export const updateOrderStatus = (id: string, status: string) =>
+  api.patch<Order>(`/orders/${id}/status`, { status }).then((r) => r.data);
+
+// Admin — Products
+export const createProduct = (data: {
+  name: string; slug: string; description?: string; price: number;
+  stock?: number; brand?: string; sku?: string; isFeatured?: boolean; categoryId: string;
+}) => api.post<Product>('/products', data).then((r) => r.data);
+
+export const updateProduct = (id: string, data: Partial<{
+  name: string; slug: string; description?: string; price: number;
+  stock?: number; brand?: string; sku?: string; isFeatured?: boolean;
+  isActive?: boolean; categoryId: string;
+}>) => api.patch<Product>(`/products/${id}`, data).then((r) => r.data);
+
+export const deleteProduct = (id: string) =>
+  api.delete(`/products/${id}`).then((r) => r.data);
+
+export const uploadProductImage = (id: string, file: File, isMain?: boolean) => {
+  const form = new FormData();
+  form.append('file', file);
+  return api.post<Product>(`/products/${id}/images${isMain ? '?main=true' : ''}`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then((r) => r.data);
+};
+
+// Admin — Categories
+export const createCategory = (data: { name: string; slug: string; description?: string; imageUrl?: string }) =>
+  api.post<Category>('/categories', data).then((r) => r.data);
+
+export const updateCategory = (id: string, data: Partial<{ name: string; slug: string; description?: string; imageUrl?: string }>) =>
+  api.patch<Category>(`/categories/${id}`, data).then((r) => r.data);
+
+// Admin — Users
+export const getAdminUsers = () =>
+  api.get<User[]>('/users').then((r) => r.data);
+
+// Settings
+export const getSettings = () =>
+  api.get<Record<string, string>>('/settings').then((r) => r.data);
+
+export const updateSettings = (data: Record<string, string>) =>
+  api.patch<Record<string, string>>('/settings', data).then((r) => r.data);
 
 export default api;

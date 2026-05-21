@@ -1,7 +1,17 @@
+'use client';
+
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
+import { useCartStore } from '@/store/cart';
 
 export default function OrderSuccessPage() {
+  const { clearCart } = useCartStore();
+
+  useEffect(() => {
+    clearCart();
+  }, []);
+
   return (
     <div className="pt-32 pb-24 px-6 min-h-screen flex flex-col items-center justify-center text-center gap-6">
       <CheckCircle size={48} className="text-accent" strokeWidth={1.5} />

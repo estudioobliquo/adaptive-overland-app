@@ -32,8 +32,7 @@ function RegisterForm() {
     setLoading(true);
     try {
       const { accessToken } = await register(form);
-      localStorage.setItem('ao_token', accessToken);
-      const user = await getMe();
+      const user = await getMe(accessToken);
       setAuth(user, accessToken);
       router.push(returnTo);
     } catch {

@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Providers from '@/components/Providers';
+import SiteShell from '@/components/layout/SiteShell';
 
 const bebasNeue = Bebas_Neue({
   weight: '400',
@@ -26,9 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${bebasNeue.variable} ${workSans.variable} antialiased`}>
       <body className="flex flex-col min-h-screen bg-bg text-text">
         <Providers>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SiteShell>{children}</SiteShell>
         </Providers>
       </body>
     </html>

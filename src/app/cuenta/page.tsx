@@ -37,6 +37,7 @@ export default function CuentaPage() {
     queryKey: ['my-orders'],
     queryFn: getMyOrders,
     enabled: isAuthenticated(),
+    retry: false,
   });
 
   if (!isAuthenticated()) return null;

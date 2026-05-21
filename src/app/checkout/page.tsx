@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/store/cart';
 import { useAuthStore } from '@/store/auth';
-import { createOrder, initPayment } from '@/lib/api';
+import { createOrder, initPayment, getSettings } from '@/lib/api';
 import Input from '@/components/ui/Input';
 
 interface AddressForm {
@@ -27,8 +28,11 @@ const emptyForm: AddressForm = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, clearCart } = useCartStore();
+  const { items, total } = useCartStore();
   const { isAuthenticated, user } = useAuthStore();
+
+  const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: getSettings });
+  const shippingCost = settings?.shipping_cost ? Number(settings.shipping_cost) : 0;
   const [form, setForm] = useState<AddressForm>(emptyForm);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +48,16 @@ export default function CheckoutPage() {
       router.replace('/carrito');
     }
   }, [items, router]);
+
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        fullName: f.fullName || `${user.firstName} ${user.lastName}`,
+        country: f.country || 'Paraguay',
+      }));
+    }
+  }, [user]);
 
   const set = (field: keyof AddressForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -67,10 +81,14 @@ export default function CheckoutPage() {
       });
 
       const { url } = await initPayment(order.id);
-      clearCart();
       window.location.href = url;
-    } catch {
-      setError('Hubo un error al procesar tu pedido. Intentá de nuevo.');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (typeof msg === 'string' && msg.includes('credentials not configured')) {
+        setError('El sistema de pago no está configurado aún. Tu pedido fue guardado igual.');
+      } else {
+        setError('Hubo un error al procesar tu pedido. Intentá de nuevo.');
+      }
       setLoading(false);
     }
   };
@@ -96,7 +114,6 @@ export default function CheckoutPage() {
                   required
                   value={form.fullName}
                   onChange={set('fullName')}
-                  defaultValue={user ? `${user.firstName} ${user.lastName}` : ''}
                 />
                 <Input
                   label="Teléfono"
@@ -129,7 +146,6 @@ export default function CheckoutPage() {
                     required
                     value={form.country}
                     onChange={set('country')}
-                    placeholder="Paraguay"
                   />
                 </div>
               </div>
@@ -183,11 +199,11 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted">Envío</span>
-                <span className="text-muted">A calcular</span>
+                <span>{shippingCost === 0 ? 'Gratis' : `${shippingCost.toLocaleString('es-PY')} PYG`}</span>
               </div>
               <div className="flex justify-between font-semibold pt-1">
                 <span>Total</span>
-                <span className="text-accent">{total().toLocaleString('es-PY')} PYG</span>
+                <span className="text-accent">{(total() + shippingCost).toLocaleString('es-PY')} PYG</span>
               </div>
             </div>
           </div>
