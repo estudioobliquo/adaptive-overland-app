@@ -1,17 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useCartStore } from '@/store/cart';
 import { useAuthStore } from '@/store/auth';
 
-const links = [
-  { href: '/', label: 'Inicio' },
-  { href: '/tienda', label: 'Tienda' },
+const navLinks = [
   { href: '/mi-historia', label: 'Mi Historia' },
-  { href: '/la-van', label: 'La Van' },
+  { href: '/la-van', label: 'La Van Adaptada' },
 ];
 
 export default function Navbar() {
@@ -35,17 +34,26 @@ export default function Navbar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="font-heading text-2xl tracking-widest text-text">
-          ADAPTIVE OVERLAND
+      <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex-shrink-0">
+          <Image
+            src="/logo.png"
+            alt="Adaptive Overland"
+            width={160}
+            height={48}
+            className="h-12 w-auto object-contain"
+            priority
+          />
         </Link>
 
-        <ul className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
+        {/* Center links */}
+        <ul className="hidden md:flex items-center gap-10">
+          {navLinks.map((l) => (
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="text-sm tracking-wider text-muted hover:text-text transition-colors uppercase"
+                className="text-sm tracking-[0.15em] text-white/90 hover:text-white transition-colors uppercase font-body"
               >
                 {l.label}
               </Link>
@@ -53,35 +61,45 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-4">
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          {/* Profile icon */}
           <Link
             href={isAuthenticated ? '/cuenta' : '/login'}
-            className="hidden md:block p-2 text-muted hover:text-accent transition-colors"
+            className="hidden md:flex p-2 text-white/80 hover:text-white transition-colors"
             aria-label="Mi cuenta"
           >
             <User size={20} />
           </Link>
 
-          <Link href="/carrito" className="relative p-2 hover:text-accent transition-colors">
-            <ShoppingCart size={22} />
-            <AnimatePresence>
-              {itemCount > 0 && (
-                <motion.span
-                  key="badge"
-                  className="absolute -top-0.5 -right-0.5 bg-accent text-bg text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                >
-                  {itemCount}
-                </motion.span>
-              )}
-            </AnimatePresence>
+          {/* TIENDA button with cart */}
+          <Link
+            href="/tienda"
+            className="hidden md:flex items-center gap-2 border border-white/60 text-white text-xs uppercase tracking-[0.15em] px-4 py-2 hover:bg-orange-500 hover:border-orange-500 transition-all duration-200"
+          >
+            Tienda
+            <div className="relative">
+              <ShoppingCart size={16} />
+              <AnimatePresence>
+                {itemCount > 0 && (
+                  <motion.span
+                    key="badge"
+                    className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  >
+                    {itemCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           </Link>
 
+          {/* Mobile menu toggle */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 text-white"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Menú"
           >
@@ -90,27 +108,46 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="md:hidden bg-surface border-t border-border px-6 py-4 overflow-hidden"
+            className="md:hidden bg-bg/95 backdrop-blur border-t border-border px-6 py-4 overflow-hidden"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25 }}
           >
             <ul className="flex flex-col gap-4">
-              {links.map((l) => (
+              {navLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="block text-sm tracking-wider uppercase text-muted hover:text-text transition-colors"
+                    className="block text-sm tracking-wider uppercase text-white/80 hover:text-white transition-colors"
                     onClick={() => setMenuOpen(false)}
                   >
                     {l.label}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/tienda"
+                  className="flex items-center gap-2 text-sm tracking-wider uppercase text-white/80 hover:text-white transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Tienda <ShoppingCart size={16} />
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={isAuthenticated ? '/cuenta' : '/login'}
+                  className="flex items-center gap-2 text-sm tracking-wider uppercase text-white/80 hover:text-white transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Mi cuenta <User size={16} />
+                </Link>
+              </li>
             </ul>
           </motion.div>
         )}

@@ -21,11 +21,11 @@ export default async function HomePage() {
   const manifesto = findSection(content, 'manifesto');
   const video = findSection(content, 'featured_video');
 
-  const featured = products.slice(0, 4);
+  const featured = products.slice(0, 3);
 
   return (
     <>
-      <HeroSection title={hero?.title} mediaUrl={hero?.mediaUrl} />
+      <HeroSection title={hero?.title} />
       <ManifiestoSection body={manifesto?.body} />
       <FeaturedProductsSection products={featured} />
       <VideoSection youtubeUrl={video?.youtubeUrl} title={video?.title} />

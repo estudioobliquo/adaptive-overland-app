@@ -1,82 +1,112 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { ShoppingCart } from 'lucide-react';
 import type { Product } from '@/lib/types';
-import ProductCard from '@/components/shop/ProductCard';
-import { fadeUp, stagger, staggerFast, viewportOnce, ease } from '@/lib/motion';
+import { fadeUp, stagger, viewportOnce, ease } from '@/lib/motion';
+import { useCartStore } from '@/store/cart';
 
 interface FeaturedProductsSectionProps {
   products: Product[];
 }
 
-export default function FeaturedProductsSection({ products }: FeaturedProductsSectionProps) {
+function FeaturedCard({ product }: { product: Product }) {
+  const addItem = useCartStore((s) => s.addItem);
+  const mainImage = product.images?.find((i) => i.isMain) ?? product.images?.[0];
+
   return (
-    <section className="py-24 px-6 bg-surface">
-      <div className="max-w-7xl mx-auto">
+    <motion.article
+      className="group flex flex-col"
+      variants={fadeUp}
+      transition={{ duration: 0.5, ease }}
+    >
+      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#e8e4de]">
+        {mainImage ? (
+          <motion.img
+            src={mainImage.url}
+            alt={product.name}
+            className="w-full h-full object-cover"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.5 }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#888] text-xs uppercase tracking-widest">
+            Sin imagen
+          </div>
+        )}
+      </Link>
+
+      <div className="bg-white px-4 py-3">
+        <Link href={`/tienda/${product.slug}`} className="font-heading text-xl text-[#1a1714] hover:text-orange-500 transition-colors tracking-wide">
+          {product.name.toUpperCase()}
+        </Link>
+        <p className="text-sm text-[#1a1714] mt-0.5">
+          {Number(product.price).toLocaleString('es-PY')} Gs.
+        </p>
+      </div>
+    </motion.article>
+  );
+}
+
+export default function FeaturedProductsSection({ products }: FeaturedProductsSectionProps) {
+  const featured = products.slice(0, 3);
+
+  return (
+    <section className="bg-[#f0ece6] py-14 px-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
         <motion.div
-          className="flex items-end justify-between mb-12"
+          className="text-center mb-10"
           variants={stagger}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
         >
-          <div>
-            <motion.p
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease }}
-              className="text-xs uppercase tracking-[0.3em] text-accent mb-2"
-            >
-              Destacados
-            </motion.p>
-            <motion.h2
-              variants={fadeUp}
-              transition={{ duration: 0.6, ease }}
-              className="font-heading text-5xl md:text-6xl"
-            >
-              PRODUCTOS
-            </motion.h2>
-          </div>
-          <motion.div variants={fadeUp} transition={{ duration: 0.5, ease }}>
-            <Link
-              href="/tienda"
-              className="hidden md:inline-block text-xs uppercase tracking-widest text-muted hover:text-accent transition-colors border-b border-muted/30 hover:border-accent pb-0.5"
-            >
-              Ver tienda completa
-            </Link>
-          </motion.div>
+          <motion.h2
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease }}
+            className="font-heading text-4xl md:text-5xl text-[#1a1714] leading-none"
+          >
+            PRODUCTOS DESTACADOS
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            transition={{ duration: 0.5, delay: 0.1, ease }}
+            className="text-xs uppercase tracking-[0.3em] text-[#1a1714] mt-2 font-bold"
+          >
+            Colección Nómada
+          </motion.p>
         </motion.div>
 
+        {/* Grid de 3 */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-          variants={staggerFast}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+          variants={stagger}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
         >
-          {products.map((product) => (
-            <motion.div
-              key={product.id}
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
+          {featured.map((product) => (
+            <FeaturedCard key={product.id} product={product} />
           ))}
         </motion.div>
 
+        {/* CTA */}
         <motion.div
-          className="mt-10 text-center md:hidden"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          className="mt-10 text-center"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={viewportOnce}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Link
             href="/tienda"
-            className="inline-block border border-border hover:border-accent text-xs uppercase tracking-widest text-muted hover:text-accent px-8 py-3 transition-colors"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs uppercase tracking-[0.15em] px-8 py-3 transition-all duration-200 font-semibold"
           >
-            Ver tienda completa
+            IR A LA TIENDA
+            <ShoppingCart size={15} />
           </Link>
         </motion.div>
       </div>

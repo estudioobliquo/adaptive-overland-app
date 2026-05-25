@@ -54,14 +54,15 @@ export default function EditarProductoPage() {
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
       await updateProduct(id, {
-        name: form.name, slug: form.slug,
+        name: form.name,
+        slug: form.slug,
         description: form.description || undefined,
         price: Number(form.price),
         stock: Number(form.stock),
         brand: form.brand || undefined,
         sku: form.sku || undefined,
         isFeatured: form.isFeatured,
-        categoryId: form.categoryId,
+        ...(form.categoryId ? { categoryId: form.categoryId } : {}),
       });
       if (newImageFile) await uploadProductImage(id, newImageFile, false);
     },
@@ -69,7 +70,11 @@ export default function EditarProductoPage() {
       qc.invalidateQueries({ queryKey: ['products'] });
       router.push('/admin/productos');
     },
-    onError: () => setError('Error al guardar los cambios.'),
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg ?? 'Error al guardar los cambios.');
+      setError(detail);
+    },
   });
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {

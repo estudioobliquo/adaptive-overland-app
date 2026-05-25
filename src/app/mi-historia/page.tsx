@@ -1,45 +1,43 @@
-import { getContent } from '@/lib/api';
-
 export const revalidate = 60;
 
-export default async function MiHistoriaPage() {
-  const content = await getContent().catch(() => []);
-  const section = content.find((s) => s.key === 'my_story');
+const PARAGRAPHS = [
+  'Durante años entendí el viaje como una manera de conocer nuevos lugares, pero con el tiempo descubrí que también era una forma de conocerme a mi mismo. La ruta se convirtió en mi hogar, y la van en el espacio desde donde volví a conectar con la libertad, la naturaleza y las cosas simples. Así nació Adaptive Overland: no como un proyecto perfecto o planeado, sino como una necesidad de seguir moviéndome, explorando y compartiendo otra manera de vivir la aventura. Cada kilómetro recorrido, cada frontera cruzada y cada paisaje vivido forman parte de una historia que todavía sigue escribiéndose.',
+  'Viajar en silla de ruedas significa adaptarse constantemente y aprender a avanzar de maneras diferentes, pero nunca dejar de avanzar. En el camino entendí que la aventura no pertenece a un solo tipo de persona ni tiene una única forma de vivirse. Para mí, este proyecto representa movimiento, independencia y la posibilidad de descubrir el mundo a mi propio ritmo.',
+  'Más que mostrar destinos, quiero transmitir una idea: que siempre existen caminos posibles para quienes siguen mirando hacia el próximo horizonte.',
+];
 
+export default function MiHistoriaPage() {
   return (
-    <div className="pt-24 min-h-screen">
-      {/* Hero */}
-      <div className="relative h-[50vh] bg-surface flex items-center justify-center overflow-hidden">
-        {section?.mediaUrl && (
-          <img src={section.mediaUrl} alt="Mi Historia" className="absolute inset-0 w-full h-full object-cover" />
-        )}
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 text-center px-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Sobre Gregoire</p>
-          <h1 className="font-heading text-6xl md:text-8xl">MI HISTORIA</h1>
-        </div>
-      </div>
+    <section className="bg-[#f0ece6] pt-28 pb-16 px-8 lg:px-16">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-0 items-stretch">
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 py-24">
-        {section?.body ? (
-          <div className="prose prose-invert max-w-none">
-            <p className="text-text/80 text-lg leading-relaxed whitespace-pre-line">{section.body}</p>
+        {/* Texto — blanco, su altura define la fila */}
+        <div className="bg-white px-8 py-12 flex flex-col justify-center">
+          <h1 className="font-heading text-3xl md:text-4xl text-[#1a1714] mb-5 uppercase">
+            Hola! Soy Gregoire
+          </h1>
+          <div className="flex flex-col gap-3">
+            {PARAGRAPHS.map((p, i) => (
+              <p key={i} className="text-[#2a2520] text-xs leading-relaxed">
+                {p}
+              </p>
+            ))}
           </div>
-        ) : (
-          <div className="space-y-6 text-text/80 text-lg leading-relaxed">
-            <p>
-              Soy Gregoire, un viajero en silla de ruedas que decidió no aceptar que la movilidad reducida fuera un límite para la aventura.
-            </p>
-            <p>
-              Adaptive Overland nació de la necesidad de encontrar soluciones reales para viajar de forma independiente. Cada accesorio que ofrecemos fue pensado, probado y perfeccionado en ruta.
-            </p>
-            <p>
-              Creo que la libertad de movimiento es un derecho. Y que la aventura, con las herramientas correctas, no tiene límites.
-            </p>
-          </div>
-        )}
+        </div>
+
+        {/* Video — llena exactamente la altura de la card */}
+        <div className="relative overflow-hidden" style={{ margin: '16px 0' }}>
+          <video
+            className="absolute inset-0 w-full h-full object-cover"
+            src="/mi-historia.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        </div>
+
       </div>
-    </div>
+    </section>
   );
 }
