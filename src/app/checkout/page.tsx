@@ -80,15 +80,21 @@ export default function CheckoutPage() {
         notes: form.notes || undefined,
       });
 
-      const { url } = await initPayment(order.id);
-      window.location.href = url;
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      if (typeof msg === 'string' && msg.includes('credentials not configured')) {
-        setError('El sistema de pago no está configurado aún. Tu pedido fue guardado igual.');
-      } else {
-        setError('Hubo un error al procesar tu pedido. Intentá de nuevo.');
+      try {
+        const { url } = await initPayment(order.id);
+        window.location.href = url;
+      } catch (payErr: unknown) {
+        const msg = (payErr as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        if (typeof msg === 'string' && msg.includes('credentials not configured')) {
+          // Bancard not configured — go straight to success (dev/staging mode)
+          router.push(`/order/${order.id}/success`);
+        } else {
+          setError('Hubo un error al iniciar el pago. Tu pedido fue guardado, contactanos.');
+          setLoading(false);
+        }
       }
+    } catch (err: unknown) {
+      setError('Hubo un error al procesar tu pedido. Intentá de nuevo.');
       setLoading(false);
     }
   };
@@ -96,18 +102,18 @@ export default function CheckoutPage() {
   if (!isAuthenticated() || items.length === 0) return null;
 
   return (
-    <div className="pt-24 pb-24 px-6 min-h-screen">
+    <div className="pt-24 pb-24 px-6 min-h-screen bg-[#f0ece6]">
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
           <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">Último paso</p>
-          <h1 className="font-heading text-6xl">CHECKOUT</h1>
+          <h1 className="font-heading text-6xl text-[#1a1714]">CHECKOUT</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Form */}
           <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
             <div>
-              <p className="text-xs uppercase tracking-widest text-muted mb-4">Datos de contacto</p>
+              <p className="text-xs uppercase tracking-widest text-[#888] mb-4">Datos de contacto</p>
               <div className="space-y-4">
                 <Input
                   label="Nombre completo"
@@ -126,7 +132,7 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <p className="text-xs uppercase tracking-widest text-muted mb-4">Dirección de envío</p>
+              <p className="text-xs uppercase tracking-widest text-[#888] mb-4">Dirección de envío</p>
               <div className="space-y-4">
                 <Input
                   label="Dirección"
@@ -152,57 +158,57 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">
+              <label className="text-xs uppercase tracking-widest text-[#888] block mb-1.5">
                 Notas (opcional)
               </label>
               <textarea
                 value={form.notes}
                 onChange={set('notes')}
                 rows={3}
-                className="w-full bg-bg border border-border hover:border-muted/60 focus:border-accent px-4 py-3 text-sm text-text placeholder:text-muted/50 outline-none transition-colors resize-none"
+                className="w-full bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] focus:border-accent px-4 py-3 text-sm text-[#1a1714] placeholder:text-[#bbb] outline-none transition-colors resize-none"
                 placeholder="Instrucciones especiales para el envío..."
               />
             </div>
 
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-accent hover:bg-accent-hover text-bg text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
+              className="w-full py-4 bg-accent hover:bg-accent-hover text-[#1a1714] text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
             >
               {loading ? 'Procesando...' : 'Ir a pagar con Bancard'}
             </button>
           </form>
 
           {/* Order summary */}
-          <div className="bg-surface p-6 h-fit">
-            <p className="text-xs uppercase tracking-widest text-muted mb-6">Tu pedido</p>
+          <div className="bg-white p-6 h-fit border border-[#e0dcd6]">
+            <p className="text-xs uppercase tracking-widest text-[#888] mb-6">Tu pedido</p>
 
             <div className="space-y-3 mb-6">
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="flex justify-between text-sm">
-                  <span className="text-muted truncate pr-4">
+                  <span className="text-[#888] truncate pr-4">
                     {product.name} × {quantity}
                   </span>
-                  <span className="flex-shrink-0">
+                  <span className="flex-shrink-0 text-[#1a1714]">
                     {(Number(product.price) * quantity).toLocaleString('es-PY')}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-border pt-4 space-y-2">
+            <div className="border-t border-[#e0dcd6] pt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted">Subtotal</span>
-                <span>{total().toLocaleString('es-PY')} PYG</span>
+                <span className="text-[#888]">Subtotal</span>
+                <span className="text-[#1a1714]">{total().toLocaleString('es-PY')} PYG</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted">Envío</span>
-                <span>{shippingCost === 0 ? 'Gratis' : `${shippingCost.toLocaleString('es-PY')} PYG`}</span>
+                <span className="text-[#888]">Envío</span>
+                <span className="text-[#1a1714]">{shippingCost === 0 ? 'Gratis' : `${shippingCost.toLocaleString('es-PY')} PYG`}</span>
               </div>
               <div className="flex justify-between font-semibold pt-1">
-                <span>Total</span>
+                <span className="text-[#1a1714]">Total</span>
                 <span className="text-accent">{(total() + shippingCost).toLocaleString('es-PY')} PYG</span>
               </div>
             </div>

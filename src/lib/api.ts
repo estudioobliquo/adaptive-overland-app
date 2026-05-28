@@ -8,11 +8,27 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined' && !config.headers.Authorization) {
     const { useAuthStore } = require('@/store/auth');
-    const token = useAuthStore.getState().token;
+    // Fallback to localStorage in case Zustand hasn't rehydrated yet
+    const token = useAuthStore.getState().token ?? localStorage.getItem('ao_token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.startsWith('/admin') && path !== '/admin/login') {
+        const { useAuthStore } = require('@/store/auth');
+        useAuthStore.getState().logout();
+        window.location.href = '/admin/login';
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Products
 export const getProducts = (params?: { category?: string; featured?: boolean }) =>

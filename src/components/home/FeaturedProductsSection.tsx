@@ -39,7 +39,7 @@ function FeaturedCard({ product }: { product: Product }) {
       </Link>
 
       <div className="bg-white px-4 py-3">
-        <Link href={`/tienda/${product.slug}`} className="font-heading text-xl text-[#1a1714] hover:text-orange-500 transition-colors tracking-wide">
+        <Link href={`/tienda/${product.slug}`} className="font-heading text-xl text-[#1a1714] hover:text-accent transition-colors tracking-wide">
           {product.name.toUpperCase()}
         </Link>
         <p className="text-sm text-[#1a1714] mt-0.5">
@@ -103,7 +103,7 @@ export default function FeaturedProductsSection({ products }: FeaturedProductsSe
         >
           <Link
             href="/tienda"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs uppercase tracking-[0.15em] px-8 py-3 transition-all duration-200 font-semibold"
+            className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-[#1a1714] text-xs uppercase tracking-[0.15em] px-8 py-3 transition-all duration-200 font-semibold"
           >
             IR A LA TIENDA
             <ShoppingCart size={15} />

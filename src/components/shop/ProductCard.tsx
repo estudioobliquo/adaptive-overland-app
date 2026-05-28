@@ -16,11 +16,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.article
-      className="group flex flex-col bg-surface border border-border hover:border-muted/60 transition-colors"
+      className="group flex flex-col bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] transition-colors"
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-bg">
+      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#e8e4de]">
         {mainImage ? (
           <motion.img
             src={mainImage.url}
@@ -30,7 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             transition={{ duration: 0.5 }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted text-xs uppercase tracking-widest">
+          <div className="w-full h-full flex items-center justify-center text-[#888] text-xs uppercase tracking-widest">
             Sin imagen
           </div>
         )}
@@ -38,10 +38,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex-1">
-          <p className="text-xs uppercase tracking-widest text-muted mb-1">
+          <p className="text-xs uppercase tracking-widest text-[#888] mb-1">
             {product.category?.name}
           </p>
-          <Link href={`/tienda/${product.slug}`} className="font-heading text-xl hover:text-accent transition-colors">
+          <Link href={`/tienda/${product.slug}`} className="font-heading text-xl text-[#1a1714] hover:text-accent transition-colors">
             {product.name.toUpperCase()}
           </Link>
         </div>
@@ -54,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <motion.button
             onClick={() => addItem(product)}
             disabled={product.stock === 0}
-            className="p-2 border border-border hover:border-accent hover:text-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-2 border border-[#e0dcd6] hover:border-accent hover:text-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             whileTap={{ scale: 0.9 }}
             aria-label="Agregar al carrito"
           >
@@ -63,7 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {product.stock === 0 && (
-          <p className="text-xs text-muted uppercase tracking-widest">Sin stock</p>
+          <p className="text-xs text-[#888] uppercase tracking-widest">Sin stock</p>
         )}
       </div>
     </motion.article>

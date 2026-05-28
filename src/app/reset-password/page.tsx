@@ -18,7 +18,7 @@ function ResetForm() {
   if (!token) {
     return (
       <div className="text-center">
-        <p className="text-muted text-sm mb-4">Enlace inválido o expirado.</p>
+        <p className="text-[#888] text-sm mb-4">Enlace inválido o expirado.</p>
         <Link href="/olvide-mi-contrasena" className="text-xs uppercase tracking-widest text-accent hover:underline">
           Solicitar uno nuevo
         </Link>
@@ -47,32 +47,32 @@ function ResetForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Nueva contraseña</label>
+        <label className="text-xs uppercase tracking-widest text-[#888] block mb-1.5">Nueva contraseña</label>
         <input
           type="password"
           required
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full bg-bg border border-border hover:border-muted/60 focus:border-accent px-4 py-3 text-sm text-text outline-none transition-colors"
+          className="w-full bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] focus:border-accent px-4 py-3 text-sm text-[#1a1714] outline-none transition-colors"
         />
       </div>
       <div>
-        <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Confirmar contraseña</label>
+        <label className="text-xs uppercase tracking-widest text-[#888] block mb-1.5">Confirmar contraseña</label>
         <input
           type="password"
           required
           minLength={8}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="w-full bg-bg border border-border hover:border-muted/60 focus:border-accent px-4 py-3 text-sm text-text outline-none transition-colors"
+          className="w-full bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] focus:border-accent px-4 py-3 text-sm text-[#1a1714] outline-none transition-colors"
         />
       </div>
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-4 bg-accent hover:bg-accent-hover disabled:opacity-60 text-bg text-xs uppercase tracking-widest font-semibold transition-colors"
+        className="w-full py-4 bg-accent hover:bg-accent-hover disabled:opacity-60 text-[#1a1714] text-xs uppercase tracking-widest font-semibold transition-colors"
       >
         {loading ? 'Guardando...' : 'Cambiar contraseña'}
       </button>
@@ -82,11 +82,11 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center">
+    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center bg-[#f0ece6]">
       <div className="w-full max-w-md">
         <div className="mb-10 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">Cuenta</p>
-          <h1 className="font-heading text-5xl">NUEVA CONTRASEÑA</h1>
+          <h1 className="font-heading text-5xl text-[#1a1714]">NUEVA CONTRASEÑA</h1>
         </div>
         <Suspense>
           <ResetForm />

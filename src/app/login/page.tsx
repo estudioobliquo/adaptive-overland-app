@@ -39,7 +39,7 @@ function LoginForm() {
     <div className="w-full max-w-md">
       <div className="mb-10 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">Bienvenido</p>
-        <h1 className="font-heading text-5xl">INICIAR SESIÓN</h1>
+        <h1 className="font-heading text-5xl text-[#1a1714]">INICIAR SESIÓN</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,26 +60,26 @@ function LoginForm() {
           onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
         />
 
-        {passwordReset && <p className="text-green-400 text-sm">Contraseña actualizada. Podés iniciar sesión.</p>}
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        {passwordReset && <p className="text-green-600 text-sm">Contraseña actualizada. Podés iniciar sesión.</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-accent hover:bg-accent-hover text-bg text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
+          className="w-full py-4 bg-accent hover:bg-accent-hover text-[#1a1714] text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-muted">
+      <p className="mt-4 text-center text-sm text-[#888]">
         <Link href="/olvide-mi-contrasena" className="hover:text-accent transition-colors">
           ¿Olvidaste tu contraseña?
         </Link>
       </p>
-      <p className="mt-2 text-center text-sm text-muted">
+      <p className="mt-2 text-center text-sm text-[#888]">
         ¿No tenés cuenta?{' '}
-        <Link href={`/register?returnTo=${returnTo}`} className="text-text hover:text-accent transition-colors">
+        <Link href={`/register?returnTo=${returnTo}`} className="text-[#1a1714] hover:text-accent transition-colors">
           Registrate
         </Link>
       </p>
@@ -89,7 +89,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center">
+    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center bg-[#f0ece6]">
       <Suspense>
         <LoginForm />
       </Suspense>

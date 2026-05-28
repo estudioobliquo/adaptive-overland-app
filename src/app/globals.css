@@ -14,15 +14,15 @@
 }
 
 html {
-  background-color: #0f0f0f;
-  color: #f0ede8;
+  background-color: #f0ece6;
+  color: #1a1714;
   scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-work-sans), sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  background-color: #f0ece6;
+  color: #1a1714;
 }
 
 h1, h2, h3, h4, h5, h6 {

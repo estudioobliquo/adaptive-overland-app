@@ -21,16 +21,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center">
+    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center bg-[#f0ece6]">
       <div className="w-full max-w-md">
         <div className="mb-10 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">Cuenta</p>
-          <h1 className="font-heading text-5xl">RECUPERAR CONTRASEÑA</h1>
+          <h1 className="font-heading text-5xl text-[#1a1714]">RECUPERAR CONTRASEÑA</h1>
         </div>
 
         {sent ? (
           <div className="text-center space-y-4">
-            <p className="text-sm text-muted leading-relaxed">
+            <p className="text-sm text-[#888] leading-relaxed">
               Si existe una cuenta con ese email, recibiste un enlace para restablecer tu contraseña. Revisá tu bandeja de entrada.
             </p>
             <Link
@@ -42,27 +42,27 @@ export default function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <p className="text-sm text-muted text-center mb-6">
+            <p className="text-sm text-[#888] text-center mb-6">
               Ingresá tu email y te enviamos un enlace para restablecer tu contraseña.
             </p>
             <div>
-              <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Email</label>
+              <label className="text-xs uppercase tracking-widest text-[#888] block mb-1.5">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-bg border border-border hover:border-muted/60 focus:border-accent px-4 py-3 text-sm text-text outline-none transition-colors"
+                className="w-full bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] focus:border-accent px-4 py-3 text-sm text-[#1a1714] outline-none transition-colors"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-accent hover:bg-accent-hover disabled:opacity-60 text-bg text-xs uppercase tracking-widest font-semibold transition-colors"
+              className="w-full py-4 bg-accent hover:bg-accent-hover disabled:opacity-60 text-[#1a1714] text-xs uppercase tracking-widest font-semibold transition-colors"
             >
               {loading ? 'Enviando...' : 'Enviar enlace'}
             </button>
-            <p className="text-center text-sm text-muted mt-2">
+            <p className="text-center text-sm text-[#888] mt-2">
               <Link href="/login" className="hover:text-accent transition-colors">Volver al login</Link>
             </p>
           </form>

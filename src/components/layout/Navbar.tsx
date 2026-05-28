@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useCartStore } from '@/store/cart';
@@ -18,6 +19,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemCount = useCartStore((s) => s.itemCount());
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -25,10 +28,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
+  const showSolid = !isHome || scrolled;
+
   return (
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-bg/95 backdrop-blur border-b border-border' : 'bg-transparent'
+        showSolid ? 'bg-[#1a1714]/95 backdrop-blur border-b border-[#2a2520]' : 'bg-transparent'
       }`}
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -72,29 +77,35 @@ export default function Navbar() {
             <User size={20} />
           </Link>
 
-          {/* TIENDA button with cart */}
+          {/* TIENDA button */}
           <Link
             href="/tienda"
-            className="hidden md:flex items-center gap-2 border border-white/60 text-white text-xs uppercase tracking-[0.15em] px-4 py-2 hover:bg-orange-500 hover:border-orange-500 transition-all duration-200"
+            className="hidden md:flex items-center border border-white/60 text-white text-xs uppercase tracking-[0.15em] px-4 py-2 hover:bg-accent hover:border-accent transition-all duration-200"
           >
             Tienda
-            <div className="relative">
-              <ShoppingCart size={16} />
-              <AnimatePresence>
-                {itemCount > 0 && (
-                  <motion.span
-                    key="badge"
-                    className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  >
-                    {itemCount}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
+          </Link>
+
+          {/* Carrito icon */}
+          <Link
+            href="/carrito"
+            className="hidden md:flex p-2 text-white/80 hover:text-white transition-colors relative"
+            aria-label="Carrito"
+          >
+            <ShoppingCart size={20} />
+            <AnimatePresence>
+              {itemCount > 0 && (
+                <motion.span
+                  key="badge"
+                  className="absolute -top-0.5 -right-0.5 bg-accent text-[#1a1714] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  {itemCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </Link>
 
           {/* Mobile menu toggle */}
@@ -136,7 +147,17 @@ export default function Navbar() {
                   className="flex items-center gap-2 text-sm tracking-wider uppercase text-white/80 hover:text-white transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Tienda <ShoppingCart size={16} />
+                  Tienda
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/carrito"
+                  className="flex items-center gap-2 text-sm tracking-wider uppercase text-white/80 hover:text-white transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Carrito
+                  {itemCount > 0 && <span className="bg-accent text-[#1a1714] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{itemCount}</span>}
                 </Link>
               </li>
               <li>

@@ -46,7 +46,7 @@ function RegisterForm() {
     <div className="w-full max-w-md">
       <div className="mb-10 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">Nueva cuenta</p>
-        <h1 className="font-heading text-5xl">REGISTRARSE</h1>
+        <h1 className="font-heading text-5xl text-[#1a1714]">REGISTRARSE</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,20 +72,20 @@ function RegisterForm() {
           onChange={set('password')}
         />
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-accent hover:bg-accent-hover text-bg text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
+          className="w-full py-4 bg-accent hover:bg-accent-hover text-[#1a1714] text-xs uppercase tracking-widest font-semibold transition-colors disabled:opacity-60"
         >
           {loading ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted">
+      <p className="mt-6 text-center text-sm text-[#888]">
         ¿Ya tenés cuenta?{' '}
-        <Link href={`/login?returnTo=${returnTo}`} className="text-text hover:text-accent transition-colors">
+        <Link href={`/login?returnTo=${returnTo}`} className="text-[#1a1714] hover:text-accent transition-colors">
           Iniciá sesión
         </Link>
       </p>
@@ -95,7 +95,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center">
+    <div className="pt-24 pb-24 px-6 min-h-screen flex items-center justify-center bg-[#f0ece6]">
       <Suspense>
         <RegisterForm />
       </Suspense>

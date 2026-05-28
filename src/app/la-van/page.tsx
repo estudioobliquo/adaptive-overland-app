@@ -32,9 +32,9 @@ export default function LaVanPage() {
   const videoId = section?.youtubeUrl ? extractYoutubeId(section.youtubeUrl) : null;
 
   return (
-    <div className="pt-24 min-h-screen">
+    <div className="pt-24 min-h-screen bg-[#f0ece6]">
       {/* Hero */}
-      <div className="relative h-[60vh] bg-surface flex items-center justify-center overflow-hidden">
+      <div className="relative h-[60vh] bg-[#1a1714] flex items-center justify-center overflow-hidden">
         {section?.mediaUrl && (
           <motion.img
             src={section.mediaUrl}
@@ -71,14 +71,14 @@ export default function LaVanPage() {
           viewport={viewportOnce}
           transition={{ duration: 0.7, ease }}
         >
-          <p className="text-text/80 text-xl leading-relaxed">
+          <p className="text-[#2a2520] text-xl leading-relaxed">
             {section?.body ?? 'Cada modificación fue diseñada para que viajar en silla de ruedas sea tan libre y cómodo como para cualquier aventurero. Esta es la van que lo hace posible.'}
           </p>
         </motion.div>
 
         {/* Features grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#e0dcd6]"
           variants={staggerFast}
           initial="hidden"
           whileInView="visible"
@@ -87,12 +87,12 @@ export default function LaVanPage() {
           {features.map((f) => (
             <motion.div
               key={f.label}
-              className="bg-bg p-8"
+              className="bg-white p-8"
               variants={fadeUp}
               transition={{ duration: 0.5, ease }}
             >
-              <h3 className="font-heading text-2xl mb-3">{f.label.toUpperCase()}</h3>
-              <p className="text-muted text-sm leading-relaxed">{f.desc}</p>
+              <h3 className="font-heading text-2xl mb-3 text-[#1a1714]">{f.label.toUpperCase()}</h3>
+              <p className="text-[#888] text-sm leading-relaxed">{f.desc}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -107,7 +107,7 @@ export default function LaVanPage() {
             transition={{ duration: 0.8 }}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Van Tour</p>
-            <div className="aspect-video w-full bg-surface overflow-hidden">
+            <div className="aspect-video w-full bg-[#e8e4de] overflow-hidden">
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
                 title="Van Tour"

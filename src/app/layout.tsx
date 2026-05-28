@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${bebasNeue.variable} ${workSans.variable} antialiased`}>
-      <body className="flex flex-col min-h-screen bg-bg text-text">
+      <body className="flex flex-col min-h-screen bg-[#f0ece6] text-[#1a1714]">
         <Providers>
           <SiteShell>{children}</SiteShell>
         </Providers>
