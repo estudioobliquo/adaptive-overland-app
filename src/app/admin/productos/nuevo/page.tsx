@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCategories, createProduct, uploadProductImage } from '@/lib/api';
 import { ArrowLeft, Upload } from 'lucide-react';
 
@@ -12,6 +12,7 @@ function slugify(str: string) {
 
 export default function NuevoProductoPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories });
 
   const [form, setForm] = useState({
@@ -41,11 +42,32 @@ export default function NuevoProductoPage() {
         isFeatured: form.isFeatured,
         categoryId: form.categoryId,
       });
-      if (imageFile) await uploadProductImage(product.id, imageFile, true);
-      return product;
+
+      // El producto ya existe; si la imagen falla, no lo dejamos huérfano:
+      // mandamos a la pantalla de edición para reintentar la carga.
+      if (imageFile) {
+        try {
+          await uploadProductImage(product.id, imageFile, true);
+        } catch {
+          return { product, imageFailed: true };
+        }
+      }
+      return { product, imageFailed: false };
     },
-    onSuccess: () => router.push('/admin/productos'),
-    onError: () => setError('Error al crear el producto. Verificá los datos.'),
+    onSuccess: ({ product, imageFailed }) => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+      if (imageFailed) {
+        router.push(`/admin/productos/${product.id}`);
+      } else {
+        router.push('/admin/productos');
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg ?? 'Error al crear el producto. Verificá los datos.');
+      setError(detail);
+    },
   });
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {

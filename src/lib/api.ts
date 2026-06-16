@@ -37,6 +37,10 @@ export const getProducts = (params?: { category?: string; featured?: boolean }) 
 export const getProduct = (slug: string) =>
   api.get<Product>(`/products/${slug}`).then((r) => r.data);
 
+// Admin — lista todos los productos, incluidos los inactivos
+export const getAdminProducts = () =>
+  api.get<Product[]>('/products/admin/all').then((r) => r.data);
+
 // Categories
 export const getCategories = () =>
   api.get<Category[]>('/categories').then((r) => r.data);
@@ -100,9 +104,7 @@ export const deleteProduct = (id: string) =>
 export const uploadProductImage = (id: string, file: File, isMain?: boolean) => {
   const form = new FormData();
   form.append('file', file);
-  return api.post<Product>(`/products/${id}/images${isMain ? '?main=true' : ''}`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }).then((r) => r.data);
+  return api.post<Product>(`/products/${id}/images${isMain ? '?main=true' : ''}`, form).then((r) => r.data);
 };
 
 // Admin — Categories

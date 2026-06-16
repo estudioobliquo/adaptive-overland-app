@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, deleteProduct, updateProduct } from '@/lib/api';
+import { getAdminProducts, deleteProduct, updateProduct } from '@/lib/api';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminProductosPage() {
@@ -12,14 +12,15 @@ export default function AdminProductosPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => getProducts(),
+    queryKey: ['admin-products'],
+    queryFn: () => getAdminProducts(),
     retry: false,
   });
 
   const { mutate: remove } = useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
       qc.invalidateQueries({ queryKey: ['products'] });
       setConfirmDelete(null);
     },
@@ -27,7 +28,10 @@ export default function AdminProductosPage() {
 
   const { mutate: toggleActive } = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => updateProduct(id, { isActive }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+    },
   });
 
   return (

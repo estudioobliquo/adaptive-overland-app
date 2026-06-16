@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProduct, getCategories, updateProduct, uploadProductImage } from '@/lib/api';
-import { ArrowLeft, Upload, Plus } from 'lucide-react';
-
-function slugify(str: string) {
-  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-}
+import { ArrowLeft, Plus } from 'lucide-react';
 
 export default function EditarProductoPage() {
   const router = useRouter();
@@ -48,7 +44,6 @@ export default function EditarProductoPage() {
   const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setForm((f) => ({ ...f, [field]: value }));
-    if (field === 'name') setForm((f) => ({ ...f, name: e.target.value as string, slug: slugify(e.target.value as string) }));
   };
 
   const { mutate: save, isPending: saving } = useMutation({
@@ -67,7 +62,9 @@ export default function EditarProductoPage() {
       if (newImageFile) await uploadProductImage(id, newImageFile, false);
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['product', id] });
       router.push('/admin/productos');
     },
     onError: (err: unknown) => {

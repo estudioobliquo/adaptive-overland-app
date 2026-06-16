@@ -9,6 +9,7 @@ import { getProducts, getSettings } from '@/lib/api';
 
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, total } = useCartStore();
+  const syncProducts = useCartStore((s) => s.syncProducts);
 
   const { data: freshProducts } = useQuery({
     queryKey: ['products'],
@@ -23,19 +24,10 @@ export default function CarritoPage() {
 
   const shippingCost = settings?.shipping_cost ? Number(settings.shipping_cost) : 0;
 
-  // Adjust cart quantities based on fresh stock data
+  // Sincroniza precio, stock y disponibilidad del carrito con los datos frescos.
   useEffect(() => {
-    if (!freshProducts) return;
-    items.forEach(({ product, quantity }) => {
-      const fresh = freshProducts.find((p) => p.id === product.id);
-      if (!fresh || !fresh.isActive) {
-        removeItem(product.id);
-      } else if (quantity > fresh.stock) {
-        if (fresh.stock === 0) removeItem(product.id);
-        else updateQuantity(product.id, fresh.stock);
-      }
-    });
-  }, [freshProducts]);
+    if (freshProducts) syncProducts(freshProducts);
+  }, [freshProducts, syncProducts]);
 
   const stockWarnings = freshProducts
     ? items.filter(({ product, quantity }) => {

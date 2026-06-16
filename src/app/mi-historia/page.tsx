@@ -8,8 +8,8 @@ const PARAGRAPHS = [
 
 export default function MiHistoriaPage() {
   return (
-    <section className="bg-[#f0ece6] pt-28 pb-16 px-8 lg:px-16">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-0 items-stretch">
+    <section className="bg-[#f0ece6] min-h-screen flex items-center px-8 lg:px-16 py-24">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-0 items-stretch">
 
         {/* Texto — blanco, su altura define la fila */}
         <div className="bg-white px-8 py-12 flex flex-col justify-center">

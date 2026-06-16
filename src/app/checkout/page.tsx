@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/store/cart';
 import { useAuthStore } from '@/store/auth';
-import { createOrder, initPayment, getSettings } from '@/lib/api';
+import { createOrder, initPayment, getSettings, getProducts } from '@/lib/api';
 import Input from '@/components/ui/Input';
 
 interface AddressForm {
@@ -29,13 +29,24 @@ const emptyForm: AddressForm = {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, total } = useCartStore();
+  const syncProducts = useCartStore((s) => s.syncProducts);
   const { isAuthenticated, user } = useAuthStore();
 
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: getSettings });
+  const { data: freshProducts } = useQuery({
+    queryKey: ['products'],
+    queryFn: () => getProducts(),
+    enabled: items.length > 0,
+  });
   const shippingCost = settings?.shipping_cost ? Number(settings.shipping_cost) : 0;
   const [form, setForm] = useState<AddressForm>(emptyForm);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Mantiene precios/stock del carrito al día con el backend.
+  useEffect(() => {
+    if (freshProducts) syncProducts(freshProducts);
+  }, [freshProducts, syncProducts]);
 
   useEffect(() => {
     if (!isAuthenticated()) {

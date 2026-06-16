@@ -6,11 +6,11 @@ import { CheckCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cart';
 
 export default function OrderSuccessPage() {
-  const { clearCart } = useCartStore();
+  const clearCart = useCartStore((s) => s.clearCart);
 
   useEffect(() => {
     clearCart();
-  }, []);
+  }, [clearCart]);
 
   return (
     <div className="pt-32 pb-24 px-6 min-h-screen flex flex-col items-center justify-center text-center gap-6 bg-[#f0ece6]">
