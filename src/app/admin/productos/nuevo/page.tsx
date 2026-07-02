@@ -58,7 +58,7 @@ export default function NuevoProductoPage() {
       qc.invalidateQueries({ queryKey: ['admin-products'] });
       qc.invalidateQueries({ queryKey: ['products'] });
       if (imageFailed) {
-        router.push(`/admin/productos/${product.id}`);
+        router.push(`/admin/productos/${product.id}?imageError=1`);
       } else {
         router.push('/admin/productos');
       }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProduct, getCategories, updateProduct, uploadProductImage } from '@/lib/api';
 import { ArrowLeft, Plus } from 'lucide-react';
@@ -9,6 +9,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 export default function EditarProductoPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const qc = useQueryClient();
 
   const { data: product, isLoading } = useQuery({
@@ -24,6 +25,12 @@ export default function EditarProductoPage() {
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
   const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('imageError') === '1') {
+      setError('El producto se guardó, pero la imagen no se pudo subir. Reintentá agregar la imagen.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (product) {
@@ -48,6 +55,9 @@ export default function EditarProductoPage() {
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
+      if (newImageFile) {
+        await uploadProductImage(id, newImageFile, product.images?.length === 0);
+      }
       await updateProduct(id, {
         name: form.name,
         slug: form.slug,
@@ -59,7 +69,6 @@ export default function EditarProductoPage() {
         isFeatured: form.isFeatured,
         ...(form.categoryId ? { categoryId: form.categoryId } : {}),
       });
-      if (newImageFile) await uploadProductImage(id, newImageFile, false);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-products'] });
