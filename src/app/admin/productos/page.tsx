@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAdminProducts, deleteProduct, updateProduct } from '@/lib/api';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
@@ -74,7 +73,7 @@ export default function AdminProductosPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {mainImg ? (
-                          <Image src={mainImg.url} alt={product.name} width={40} height={40} className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
+                          <img src={mainImg.url} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs">IMG</div>
                         )}
