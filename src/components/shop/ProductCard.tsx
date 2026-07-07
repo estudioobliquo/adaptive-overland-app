@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.article
-      className="group flex flex-col bg-white border border-[#e0dcd6] hover:border-[#c0bcb8] transition-colors"
+      className="group flex flex-col"
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
