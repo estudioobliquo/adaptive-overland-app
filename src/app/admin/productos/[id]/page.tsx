@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProduct, getCategories, updateProduct, uploadProductImage } from '@/lib/api';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { getProduct, getCategories, updateProduct, uploadProductImage, deleteProductImage } from '@/lib/api';
+import { ArrowLeft, Trash2, Upload, X } from 'lucide-react';
+
+type PendingImage = { id: string; file: File; preview: string };
 
 export default function EditarProductoPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const qc = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
@@ -22,8 +25,8 @@ export default function EditarProductoPage() {
     name: '', slug: '', description: '', price: '', stock: '',
     brand: '', sku: '', isFeatured: false, categoryId: '',
   });
-  const [newImageFile, setNewImageFile] = useState<File | null>(null);
-  const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -48,15 +51,50 @@ export default function EditarProductoPage() {
     }
   }, [product]);
 
+  useEffect(() => () => {
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.preview));
+  }, [pendingImages]);
+
   const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setForm((f) => ({ ...f, [field]: value }));
   };
 
+  const clearPendingImages = () => {
+    pendingImages.forEach((img) => URL.revokeObjectURL(img.preview));
+    setPendingImages([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePendingImage = (pendingId: string) => {
+    setPendingImages((prev) => {
+      const target = prev.find((img) => img.id === pendingId);
+      if (target) URL.revokeObjectURL(target.preview);
+      return prev.filter((img) => img.id !== pendingId);
+    });
+  };
+
+  const { mutate: removeImage } = useMutation({
+    mutationFn: (imageId: string) => deleteProductImage(id, imageId),
+    onMutate: (imageId) => setDeletingImageId(imageId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['product', id] });
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
+      const detail = Array.isArray(msg) ? msg.join(', ') : (msg ?? 'No se pudo eliminar la imagen.');
+      setError(detail);
+    },
+    onSettled: () => setDeletingImageId(null),
+  });
+
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
-      if (newImageFile) {
-        await uploadProductImage(id, newImageFile, product.images?.length === 0);
+      const existingCount = product!.images?.length ?? 0;
+      for (let i = 0; i < pendingImages.length; i++) {
+        await uploadProductImage(id, pendingImages[i].file, existingCount === 0 && i === 0);
       }
       await updateProduct(id, {
         name: form.name,
@@ -71,6 +109,7 @@ export default function EditarProductoPage() {
       });
     },
     onSuccess: () => {
+      clearPendingImages();
       qc.invalidateQueries({ queryKey: ['admin-products'] });
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['product', id] });
@@ -83,15 +122,24 @@ export default function EditarProductoPage() {
     },
   });
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setNewImageFile(file);
-    setNewImagePreview(URL.createObjectURL(file));
+  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    const added = files.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setPendingImages((prev) => [...prev, ...added]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   if (isLoading) return <div className="p-8 flex justify-center"><div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" /></div>;
   if (!product) return <div className="p-8 text-sm text-gray-500">Producto no encontrado</div>;
+
+  const hasImages = (product.images?.length ?? 0) > 0 || pendingImages.length > 0;
 
   return (
     <div className="p-8 max-w-2xl">
@@ -101,35 +149,84 @@ export default function EditarProductoPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Editar producto</h1>
 
       <form onSubmit={(e) => { e.preventDefault(); setError(''); save(); }} className="space-y-5">
-        {/* Existing images */}
-        {product.images?.length > 0 && (
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">Imágenes actuales</label>
-            <div className="flex gap-2 flex-wrap">
-              {product.images.map((img) => (
-                <div key={img.id} className="relative">
-                  <img src={img.url} alt="" className="w-20 h-20 rounded-lg object-cover border border-gray-200" />
-                  {img.isMain && <span className="absolute top-1 left-1 bg-amber-500 text-white text-[10px] px-1 rounded">Principal</span>}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+            Imágenes del producto
+          </label>
+
+          {hasImages && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+              {product.images?.map((img) => (
+                <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                  <img src={img.url} alt="" className="w-full h-full object-contain p-1" />
+                  {img.isMain && (
+                    <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                      Principal
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(img.id)}
+                    disabled={deletingImageId === img.id}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity disabled:opacity-60"
+                    aria-label="Eliminar imagen"
+                  >
+                    {deletingImageId === img.id ? (
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                  </button>
+                </div>
+              ))}
+
+              {pendingImages.map((img, index) => (
+                <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden border border-amber-300 bg-gray-50">
+                  <img src={img.preview} alt="" className="w-full h-full object-contain p-1" />
+                  <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                    {(product.images?.length ?? 0) === 0 && index === 0 ? 'Nueva principal' : 'Nueva'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removePendingImage(img.id)}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                    aria-label="Quitar imagen pendiente"
+                  >
+                    <X size={14} />
+                  </button>
+                  <span className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[10px] px-2 py-1 truncate">
+                    {img.file.name}
+                  </span>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Add image */}
-        <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">Agregar imagen</label>
-          <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-amber-400 transition-colors overflow-hidden">
-            {newImagePreview ? (
-              <img src={newImagePreview} alt="preview" className="w-full h-full object-cover" />
-            ) : (
-              <div className="flex items-center gap-2 text-gray-400">
-                <Plus size={16} />
-                <span className="text-xs">Agregar imagen</span>
-              </div>
-            )}
-            <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
+          <label className="flex flex-col items-center justify-center w-full min-h-32 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-amber-400 transition-colors bg-gray-50">
+            <div className="flex flex-col items-center gap-2 text-gray-400 py-6">
+              <Upload size={22} />
+              <span className="text-xs font-medium">Agregar imágenes</span>
+              <span className="text-[11px] text-gray-400">Podés seleccionar varias a la vez</span>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleImages}
+            />
           </label>
+
+          {pendingImages.length > 0 && (
+            <button
+              type="button"
+              onClick={clearPendingImages}
+              className="mt-2 text-xs text-red-500 hover:text-red-600"
+            >
+              Quitar todas las imágenes nuevas ({pendingImages.length})
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">

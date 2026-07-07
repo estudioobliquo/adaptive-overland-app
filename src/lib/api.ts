@@ -107,6 +107,9 @@ export const uploadProductImage = (id: string, file: File, isMain?: boolean) => 
   return api.post<Product>(`/products/${id}/images${isMain ? '?main=true' : ''}`, form).then((r) => r.data);
 };
 
+export const deleteProductImage = (productId: string, imageId: string) =>
+  api.delete(`/products/${productId}/images/${imageId}`).then((r) => r.data);
+
 // Admin — Categories
 export const createCategory = (data: { name: string; slug: string; description?: string; imageUrl?: string }) =>
   api.post<Category>('/categories', data).then((r) => r.data);
