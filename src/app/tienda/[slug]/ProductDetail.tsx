@@ -67,7 +67,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="flex flex-col gap-3">
-            <div className="aspect-square bg-[#e8e4de] overflow-hidden flex items-center justify-center p-6 sm:p-8">
+            <div className="aspect-square bg-[#f0ece6] overflow-hidden flex items-center justify-center p-6 sm:p-8">
               {selectedImage ? (
                 <img
                   src={selectedImage.url}
@@ -86,7 +86,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                     key={img.id}
                     type="button"
                     onClick={() => setSelectedImage(img)}
-                    className={`aspect-square bg-[#e8e4de] overflow-hidden flex items-center justify-center p-2 transition-colors ${
+                    className={`aspect-square bg-[#f0ece6] overflow-hidden flex items-center justify-center p-2 transition-colors ${
                       selectedImage?.id === img.id ? 'ring-2 ring-accent ring-offset-2 ring-offset-[#f0ece6]' : 'hover:ring-1 hover:ring-[#c0bcb8]'
                     }`}
                     aria-label={`Ver imagen ${img.isMain ? 'principal' : 'del producto'}`}

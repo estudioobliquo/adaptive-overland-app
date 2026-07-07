@@ -22,7 +22,7 @@ function FeaturedCard({ product }: { product: Product }) {
       variants={fadeUp}
       transition={{ duration: 0.5, ease }}
     >
-      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#e8e4de] p-4">
+      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#f0ece6] p-4">
         {mainImage ? (
           <motion.img
             src={mainImage.url}
