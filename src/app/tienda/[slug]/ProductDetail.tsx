@@ -1,21 +1,32 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ShoppingCart, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getProduct } from '@/lib/api';
 import { useCartStore } from '@/store/cart';
+import type { ProductImage } from '@/lib/types';
 
 export default function ProductDetail({ slug }: { slug: string }) {
   const addItem = useCartStore((s) => s.addItem);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<ProductImage | null>(null);
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => getProduct(slug),
   });
+
+  useEffect(() => {
+    if (!product?.images?.length) {
+      setSelectedImage(null);
+      return;
+    }
+    const main = product.images.find((i) => i.isMain) ?? product.images[0];
+    setSelectedImage(main);
+  }, [product]);
 
   if (isLoading) {
     return (
@@ -36,8 +47,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
     );
   }
 
-  const mainImage = product.images?.find((i) => i.isMain) ?? product.images?.[0];
-  const otherImages = product.images?.filter((i) => !i.isMain) ?? [];
+  const images = product.images ?? [];
 
   const handleAddToCart = () => {
     addItem(product, quantity);
@@ -57,19 +67,36 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="flex flex-col gap-3">
-            <div className="aspect-square bg-[#e8e4de] overflow-hidden">
-              {mainImage ? (
-                <img src={mainImage.url} alt={product.name} className="w-full h-full object-cover" />
+            <div className="aspect-square bg-[#e8e4de] overflow-hidden flex items-center justify-center p-6 sm:p-8">
+              {selectedImage ? (
+                <img
+                  src={selectedImage.url}
+                  alt={product.name}
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[#888] text-sm">Sin imagen</div>
               )}
             </div>
-            {otherImages.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {otherImages.map((img) => (
-                  <div key={img.id} className="aspect-square bg-[#e8e4de] overflow-hidden">
-                    <img src={img.url} alt={product.name} className="w-full h-full object-cover" />
-                  </div>
+
+            {images.length > 1 && (
+              <div className="grid grid-cols-3 gap-2">
+                {images.map((img) => (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => setSelectedImage(img)}
+                    className={`aspect-square bg-[#e8e4de] overflow-hidden flex items-center justify-center p-2 transition-colors ${
+                      selectedImage?.id === img.id ? 'ring-2 ring-accent ring-offset-2 ring-offset-[#f0ece6]' : 'hover:ring-1 hover:ring-[#c0bcb8]'
+                    }`}
+                    aria-label={`Ver imagen ${img.isMain ? 'principal' : 'del producto'}`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={product.name}
+                      className="max-w-full max-h-full w-auto h-auto object-contain"
+                    />
+                  </button>
                 ))}
               </div>
             )}

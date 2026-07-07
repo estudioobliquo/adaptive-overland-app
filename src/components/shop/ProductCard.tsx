@@ -20,13 +20,13 @@ export default function ProductCard({ product }: ProductCardProps) {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#e8e4de]">
+      <Link href={`/tienda/${product.slug}`} className="block overflow-hidden aspect-square bg-[#e8e4de] p-4">
         {mainImage ? (
           <motion.img
             src={mainImage.url}
             alt={product.name}
-            className="w-full h-full object-cover"
-            whileHover={{ scale: 1.06 }}
+            className="w-full h-full object-contain"
+            whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.5 }}
           />
         ) : (

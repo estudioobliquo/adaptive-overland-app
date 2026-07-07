@@ -72,9 +72,9 @@ export default function CarritoPage() {
               const maxStock = fresh?.stock ?? product.stock;
               return (
                 <div key={product.id} className="flex gap-4 bg-white p-4">
-                  <div className="w-20 h-20 flex-shrink-0 bg-[#e8e4de] overflow-hidden">
+                  <div className="w-20 h-20 flex-shrink-0 bg-[#e8e4de] overflow-hidden flex items-center justify-center p-1.5">
                     {mainImage ? (
-                      <img src={mainImage.url} alt={product.name} className="w-full h-full object-cover" />
+                      <img src={mainImage.url} alt={product.name} className="max-w-full max-h-full object-contain" />
                     ) : (
                       <div className="w-full h-full bg-[#e0dcd6]" />
                     )}
